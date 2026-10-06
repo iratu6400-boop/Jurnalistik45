@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurn45 - Portal Berita SMAN 45 Jakarta</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#0f172a',
+                            900: '#0a0e17',
+                            950: '#05070c',
+                        },
+                        sman45: {
+                            blue: '#1e3a8a',
+                            gold: '#f59e0b',
+                            accent: '#3b82f6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Fullscreen override untuk Blogger */
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            /* Polkadot Pattern Background */
+            background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+            background-size: 20px 20px;
+        }
+
+        /* Menyembunyikan elemen bawaan template Blogger jika dipasang di Halaman/Postingan */
+        #header-wrapper, #sidebar-wrapper, #footer-wrapper, .post-title, .post-header-line-1, .post-footer, .comments, .blog-pager {
+            display: none !important;
+        }
+
+        .content-outer, .region-inner, .main-inner, .post {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        /* Running Text Marquee Styling */
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+        }
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
+
+        /* Line clamp custom */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- HIDDEN BLOGGER THUMBNAIL (Khusus indexing & thumbnail Blogger) -->
+    <div style="display:none;">
+        <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=600&auto=format&fit=crop" alt="Jurn45 SMAN 45 Jakarta Logo" />
+        <p>Portal Berita Resmi dan Mading Digital Tim Jurnalistik SMAN 45 Jakarta (Jurn45).</p>
+    </div>
+
+    <header class="bg-navy-900 text-white sticky top-0 z-50 shadow-md border-b border-navy-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('public')">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-sman45-blue to-sman45-gold flex items-center justify-center font-extrabold text-white text-xl shadow">
+                        45
+                    </div>
+                    <div>
+                        <div class="font-bold text-lg leading-none tracking-wide text-white">JURN<span class="text-sman45-gold">45</span></div>
+                        <div class="text-xs text-slate-300 font-medium">SMAN 45 JAKARTA</div>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex items-center space-x-1">
+                    <button onclick="switchView('public')" id="nav-public" class="px-3 py-2 rounded-md text-sm font-medium transition bg-slate-800 text-white">
+                        <i class="fa-solid font-normal fa-newspaper mr-1.5"></i> Beranda
+                    </button>
+                    <button onclick="filterCategory('Kegiatan')" class="px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        Kegiatan
+                    </button>
+                    <button onclick="filterCategory('Prestasi')" class="px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        Prestasi
+                    </button>
+                    <button onclick="filterCategory('Mading & Sastra')" class="px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        Mading Karya
+                    </button>
+                </nav>
+
+                <!-- User Area / Auth Button -->
+                <div class="flex items-center space-x-3">
+                    <div id="preview-badge" class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        <i class="fa-solid fa-flask mr-1"></i> Mode Preview
+                    </div>
+
+                    <div id="user-info" class="hidden items-center space-x-3">
+                        <span id="user-role-badge" class="px-2 py-1 text-xs rounded font-bold bg-blue-600 text-white uppercase"></span>
+                        <span id="user-display-name" class="text-sm font-medium text-slate-200 hidden md:inline"></span>
+                        <button onclick="handleLogout()" class="px-3 py-1.5 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg shadow transition">
+                            <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                        </button>
+                    </div>
+
+                    <button id="login-btn" onclick="openLoginModal()" class="px-4 py-2 text-sm font-semibold bg-sman45-blue hover:bg-blue-700 text-white rounded-lg shadow transition">
+                        <i class="fa-solid fa-user-lock mr-1.5"></i> Redaksi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Sub-Bar (Jika Sudah Login) -->
+        <div id="dashboard-bar" class="hidden bg-slate-800 border-t border-slate-700 text-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center space-x-4 py-2 text-xs sm:text-sm overflow-x-auto">
+                <span class="font-bold text-sman45-gold uppercase tracking-wider text-xs whitespace-nowrap"><i class="fa-solid fa-gauge mr-1"></i> Panel Redaksi:</span>
+                <button onclick="switchView('write')" id="nav-write" class="px-3 py-1 rounded bg-slate-700 text-white hover:bg-slate-600 whitespace-nowrap transition">
+                    <i class="fa-solid fa-pen-to-square mr-1"></i> Tulis Artikel Baru
+                </button>
+                <button id="nav-approval-btn" onclick="switchView('approval')" class="hidden px-3 py-1 rounded bg-slate-700 text-white hover:bg-slate-600 whitespace-nowrap transition">
+                    <i class="fa-solid fa-circle-check mr-1"></i> Persetujuan Draf <span id="pending-count" class="ml-1 bg-amber-500 text-slate-900 font-extrabold px-1.5 py-0.2 rounded-full text-xs">0</span>
+                </button>
+                <button id="nav-my-drafts-btn" onclick="switchView('my-drafts')" class="px-3 py-1 rounded bg-slate-700 text-white hover:bg-slate-600 whitespace-nowrap transition">
+                    <i class="fa-solid fa-clock-rotate-left mr-1"></i> Status Draf Saya
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- RUNNING TEXT / MARQUEE TEKS BERJALAN -->
+    <div class="bg-navy-950 border-b border-slate-800 text-xs py-2 px-4 text-slate-200 overflow-hidden flex items-center shadow-inner">
+        <div class="flex items-center space-x-2 font-extrabold text-sman45-gold bg-sman45-blue px-3 py-1 rounded-lg shrink-0 mr-3 shadow-sm border border-blue-600">
+            <i class="fa-solid fa-bullhorn animate-pulse"></i>
+            <span class="uppercase tracking-wider text-[10px] sm:text-xs">Info Jurn45</span>
+        </div>
+        <div class="overflow-hidden whitespace-nowrap w-full">
+            <div class="animate-marquee font-medium text-slate-300">
+                📢 Selamat Datang di Portal Berita & Mading Digital SMAN 45 Jakarta (Jurn45) &nbsp;&nbsp;•&nbsp;&nbsp; 🏆 Tim Jurn45 Raih Juara Liputan Terbaik &nbsp;&nbsp;•&nbsp;&nbsp; ✍️ Bagi siswa yang ingin menyalurkan karya puisi/cerpen/berita, silakan login ke Panel Redaksi &nbsp;&nbsp;•&nbsp;&nbsp; 📌 Tetap pantau informasi kegiatan terbaru SMAN 45 Jakarta di sini!
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- VIEW 1: PORTAL BERITA PUBLIK -->
+        <section id="view-public" class="space-y-8">
+            <!-- Hero Featured Banner -->
+            <div id="hero-featured" class="relative rounded-2xl overflow-hidden shadow-xl bg-navy-900 text-white min-h-[320px] md:min-h-[400px] flex items-end">
+                <img id="hero-img" src="" class="absolute inset-0 w-full h-full object-cover opacity-40 transition duration-500 hover:scale-105" alt="Featured">
+                <div class="relative z-10 p-6 md:p-8 max-w-3xl space-y-3 bg-gradient-to-t from-navy-950/90 via-navy-950/60 to-transparent w-full">
+                    <span id="hero-category" class="px-3 py-1 bg-sman45-gold text-slate-900 font-bold text-xs uppercase rounded-full tracking-wider"></span>
+                    <h1 id="hero-title" class="text-2xl md:text-4xl font-extrabold leading-tight cursor-pointer hover:text-sman45-gold transition" onclick="openDetailFromHero()"></h1>
+                    <p id="hero-snippet" class="text-slate-300 text-sm md:text-base line-clamp-2"></p>
+                    <div class="flex items-center space-x-4 text-xs text-slate-400 pt-2">
+                        <span><i class="fa-regular fa-user mr-1"></i> <span id="hero-author"></span></span>
+                        <span><i class="fa-regular fa-calendar mr-1"></i> <span id="hero-date"></span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Filter Bar -->
+            <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                <h2 class="text-xl font-bold text-slate-900 flex items-center">
+                    <i class="fa-solid fa-newspaper text-sman45-blue mr-2"></i> Berita & Artikel
+                </h2>
+                <div class="flex space-x-2 overflow-x-auto pb-1">
+                    <button onclick="filterCategory('Semua')" class="cat-btn active px-3 py-1.5 text-xs font-semibold rounded-lg bg-sman45-blue text-white shadow">Semua</button>
+                    <button onclick="filterCategory('Kegiatan')" class="cat-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100">Kegiatan</button>
+                    <button onclick="filterCategory('Prestasi')" class="cat-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100">Prestasi</button>
+                    <button onclick="filterCategory('Mading & Sastra')" class="cat-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100">Mading Karya</button>
+                    <button onclick="filterCategory('Pengumuman')" class="cat-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100">Pengumuman</button>
+                </div>
+            </div>
+
+            <!-- Articles Grid -->
+            <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Articles injected dynamically -->
+            </div>
+        </section>
+
+        <!-- VIEW 2: FORM TULIS ARTIKEL -->
+        <section id="view-write" class="hidden max-w-3xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200 space-y-6">
+            <div class="border-b pb-4">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center">
+                    <i class="fa-solid fa-pen-to-square text-sman45-blue mr-2"></i> Buat / Tulis Artikel Berita
+                </h2>
+                <p class="text-sm text-slate-500 mt-1">Artikel yang dibuat oleh Reporter akan ditinjau oleh Pemred sebelum dipublikasikan.</p>
+            </div>
+
+            <form id="article-form" onsubmit="handleFormSubmit(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Judul Artikel <span class="text-red-500">*</span></label>
+                    <input type="text" id="form-title" required placeholder="Contoh: Kemeriahan Peringatan HUT SMAN 45 Jakarta Ke-35" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sman45-blue focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Kategori <span class="text-red-500">*</span></label>
+                        <select id="form-category" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sman45-blue focus:outline-none">
+                            <option value="Kegiatan">Kegiatan Sekolah</option>
+                            <option value="Prestasi">Prestasi Siswa/Guru</option>
+                            <option value="Mading & Sastra">Mading Digital & Sastra</option>
+                            <option value="Pengumuman">Pengumuman Resmi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">URL Gambar Header</label>
+                        <input type="url" id="form-image" placeholder="https://images.unsplash.com/..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sman45-blue focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Isi Berita Lengkap <span class="text-red-500">*</span></label>
+                    <textarea id="form-content" rows="10" required placeholder="Tuliskan narasi berita secara terstruktur (5W + 1H)..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sman45-blue focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t">
+                    <button type="button" onclick="switchView('public')" class="px-5 py-2.5 rounded-lg font-semibold border border-slate-300 hover:bg-slate-100 text-slate-700 transition">
+                        Batal
+                    </button>
+                    <button type="submit" id="btn-submit-article" class="px-6 py-2.5 rounded-lg font-bold bg-sman45-blue hover:bg-blue-700 text-white shadow-md transition flex items-center">
+                        <i class="fa-solid fa-paper-plane mr-2"></i> Kirim Artikel
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- VIEW 3: APPROVAL DASHBOARD (PEMRED ONLY) -->
+        <section id="view-approval" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900 flex items-center">
+                        <i class="fa-solid fa-clipboard-check text-amber-500 mr-2"></i> Persetujuan Draf Berita
+                    </h2>
+                    <p class="text-sm text-slate-500 mt-1">Tinjau dan beri persetujuan artikel dari tim Reporter/Jurnalis SMAN 45.</p>
+                </div>
+                <span class="px-4 py-2 rounded-xl bg-amber-50 font-bold text-amber-700 border border-amber-200">
+                    Pemred Mode
+                </span>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border-b">
+                                <th class="p-4">Tanggal</th>
+                                <th class="p-4">Judul & Kategori</th>
+                                <th class="p-4">Penulis</th>
+                                <th class="p-4">Status</th>
+                                <th class="p-4 text-right">Aksi & Keputusan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="approval-table-body" class="divide-y divide-slate-200 text-sm">
+                            <!-- Rows injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: MY DRAFTS STATUS (REPORTER VIEW) -->
+        <section id="view-my-drafts" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-900 flex items-center">
+                    <i class="fa-solid fa-clock-rotate-left text-sman45-blue mr-2"></i> Status Draf Tulisan Saya
+                </h2>
+                <p class="text-sm text-slate-500 mt-1">Pantau perkembangan status publikasi artikel yang telah Anda ajukan.</p>
+            </div>
+
+            <div id="my-drafts-list" class="space-y-4">
+                <!-- My Draft Cards injected dynamically -->
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL DETAIL ARTIKEL -->
+    <div id="modal-detail" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto">
+            <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+                <span id="modal-category" class="px-3 py-1 bg-sman45-gold text-slate-900 font-bold text-xs uppercase rounded-full"></span>
+                <button onclick="closeModal('modal-detail')" class="text-slate-400 hover:text-white text-xl font-bold p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6">
+                <h1 id="modal-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight"></h1>
+                <div class="flex items-center space-x-4 text-xs text-slate-500 border-b border-t py-2">
+                    <span><i class="fa-regular fa-user mr-1"></i> Penulis: <strong id="modal-author" class="text-slate-800"></strong></span>
+                    <span><i class="fa-regular fa-calendar mr-1"></i> Tanggal: <strong id="modal-date" class="text-slate-800"></strong></span>
+                </div>
+                <img id="modal-image" src="" alt="Header" class="w-full h-72 sm:h-96 object-cover rounded-xl shadow">
+                <div id="modal-body" class="prose max-w-none text-slate-700 leading-relaxed whitespace-pre-line text-base"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL LOGIN REDAKSI -->
+    <div id="modal-login" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden p-6 sm:p-8 space-y-6">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 rounded-xl bg-sman45-blue text-white flex items-center justify-center font-bold text-2xl mx-auto shadow">
+                    45
+                </div>
+                <h3 class="text-2xl font-bold text-slate-900">Login Redaksi Jurn45</h3>
+                <p class="text-xs text-slate-500">Masukkan kredensial akun tim jurnalistik Anda</p>
+            </div>
+
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username</label>
+                    <input type="text" id="login-username" required placeholder="Username anda..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sman45-blue focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-sman45-blue focus:outline-none">
+                </div>
+                <div class="pt-2">
+                    <button type="submit" id="btn-login-submit" class="w-full py-3 bg-sman45-blue hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition flex items-center justify-center">
+                        <i class="fa-solid fa-right-to-bracket mr-2"></i> Masuk Sekarang
+                    </button>
+                </div>
+            </form>
+
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
+                <p class="font-bold text-slate-800"><i class="fa-solid fa-key text-amber-500 mr-1"></i> Info Akun DUMMY (Mode Preview):</p>
+                <p>• <strong>Pemred:</strong> username: <code class="bg-slate-200 px-1 rounded">pemred</code> | pass: <code class="bg-slate-200 px-1 rounded">jurn45hebat</code></p>
+                <p>• <strong>Reporter:</strong> username: <code class="bg-slate-200 px-1 rounded">reporter</code> | pass: <code class="bg-slate-200 px-1 rounded">jurn45hebat</code></p>
+            </div>
+
+            <div class="text-center">
+                <button onclick="closeModal('modal-login')" class="text-xs font-semibold text-slate-500 hover:text-slate-800">
+                    Batal & Kembali ke Beranda
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-navy-950 text-slate-400 py-8 border-t border-navy-900 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-3">
+            <div class="flex items-center justify-center space-x-2">
+                <div class="w-7 h-7 rounded bg-sman45-gold text-slate-900 font-bold flex items-center justify-center text-sm">45</div>
+                <span class="text-white font-bold tracking-wide">JURNALISTIK SMAN 45 JAKARTA</span>
+            </div>
+            <p class="text-xs text-slate-500">Jl. Perintis Kemerdekaan, Kelapa Gading, Jakarta Utara. Email: jurnalistik@sman45.sch.id</p>
+            <p class="text-xs text-slate-600 pt-2 border-t border-slate-800">&copy; 2026 Jurn45 WebApp CMS. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        /* KONFIGURASI APLIKASI JURN45 */
+        /* UBAH IS_PREVIEW KE false JIKA AKAN DI-DEPLOY DENGAN BACKEND GAS REAL */
+        const IS_PREVIEW = true; 
+        const GAS_URL = "URL_DEPLOY_GAS_ANDA_DISINI";
+
+        // Global State
+        let currentUser = null; // { username, name, role }
+        let currentArticles = [];
+        let currentCategoryFilter = 'Semua';
+
+        // Dummy Database untuk Mode Preview
+        let dummyArticles = [
+            {
+                id: 'ART-101',
+                title: 'Siswa SMAN 45 Jakarta Raih Juara 1 Olimpiade Sains Nasional Tingkat Provinsi',
+                category: 'Prestasi',
+                image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&auto=format&fit=crop',
+                content: 'SMAN 45 JAKARTA - Prestasi membanggakan kembali diukir oleh siswa SMAN 45 Jakarta dalam ajang Olimpiade Sains Nasional (OSN) tingkat Provinsi DKI Jakarta.\n\nDalam kompetisi ketat yang diikuti ratusan peserta dari berbagai sekolah menengah atas terbaik, perwakilan tim Jurn45 dan club Sains sekolah berhasil memborong gelar juara di bidang Matematika dan Fisika.\n\nKepala SMAN 45 Jakarta menyampaikan apresiasi setinggi-tingginya atas dedikasi para siswa dan guru pembimbing. Pembinaan rutin dan semangat juang tinggi menjadi kunci utama keberhasilan ini.',
+                author: 'Tim Redaksi Jurn45',
+                authorRole: 'pemred',
+                createdAt: '2026-03-28',
+                publishedAt: '2026-03-29',
+                status: 'APPROVED',
+                editorNote: 'Disetujui untuk terbit langsung.'
+            },
+            {
+                id: 'ART-102',
+                title: 'Kemeriahan Pentas Seni dan Gelar Karya P5 SMAN 45 Jakarta 2026',
+                category: 'Kegiatan',
+                image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop',
+                content: 'Jakarta - Lapangan SMAN 45 Jakarta dipenuhi warna-warni kreasi dan antusiasme siswa dalam acara Puncak Gelar Karya Projek Penguatan Profil Pelajar Pancasila (P5) dan Pentas Seni tahunan.\n\nAcara yang mengusung tema "Kearifan Lokal dan Inovasi Digital" ini menampilkan tari tradisional, pameran daur ulang sampah, hingga pertunjukan musik dari ekstrakurikuler seni.\n\n"Kami sangat bangga melihat semangat kemandirian siswa dalam merancang seluruh rangkaian acara dari awal hingga akhir," ujar Pembina OSIS.',
+                author: 'Budi Santoso (Reporter)',
+                authorRole: 'reporter',
+                createdAt: '2026-03-30',
+                publishedAt: '2026-03-31',
+                status: 'APPROVED',
+                editorNote: 'Artikel bagus, foto menarik.'
+            },
+            {
+                id: 'ART-103',
+                title: 'Draf: Pelatihan Jurnalistik Dasar dan Fotografi Lapangan Angkatan 2026',
+                category: 'Kegiatan',
+                image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=800&auto=format&fit=crop',
+                content: 'Tim Ekstrakurikuler Jurnalistik SMAN 45 (Jurn45) menggelar workshop wawancara dan fotografi jurnalistik dasar bagi anggota baru.\n\nKegiatan ini ditujukan untuk melatih ketajaman investigasi dan etika penulisan berita sebelum terjun langsung meliput event sekolah.',
+                author: 'Siti Rahma',
+                authorRole: 'reporter',
+                createdAt: '2026-04-01',
+                publishedAt: '-',
+                status: 'PENDING',
+                editorNote: ''
+            }
+        ];
+
+        // Init App On Load
+        window.onload = function() {
+            if (IS_PREVIEW) {
+                document.getElementById('preview-badge').classList.remove('hidden');
+                loadArticlesData(dummyArticles);
+            } else {
+                fetchArticlesFromGAS();
+            }
+            updateUIState();
+        };
+
+        // Switch Main Views
+        function switchView(viewName) {
+            document.getElementById('view-public').classList.add('hidden');
+            document.getElementById('view-write').classList.add('hidden');
+            document.getElementById('view-approval').classList.add('hidden');
+            document.getElementById('view-my-drafts').classList.add('hidden');
+
+            if (viewName === 'public') {
+                document.getElementById('view-public').classList.remove('hidden');
+            } else if (viewName === 'write') {
+                if (!currentUser) { openLoginModal(); return; }
+                document.getElementById('view-write').classList.remove('hidden');
+            } else if (viewName === 'approval') {
+                if (!currentUser || currentUser.role !== 'pemred') {
+                    alert('Hanya Pemred yang dapat mengakses menu Persetujuan Draf.');
+                    return;
+                }
+                document.getElementById('view-approval').classList.remove('hidden');
+                renderApprovalTable();
+            } else if (viewName === 'my-drafts') {
+                if (!currentUser) { openLoginModal(); return; }
+                document.getElementById('view-my-drafts').classList.remove('hidden');
+                renderMyDrafts();
+            }
+        }
+
+        // Render Public Portal
+        function loadArticlesData(articles) {
+            currentArticles = articles;
+            const approvedArticles = articles.filter(a => a.status === 'APPROVED');
+
+            if (approvedArticles.length === 0) {
+                document.getElementById('hero-featured').classList.add('hidden');
+                document.getElementById('articles-grid').innerHTML = '<p class="col-span-full text-center text-slate-500 py-12">Belum ada artikel publikasi saat ini.</p>';
+                return;
+            }
+
+            // Hero Artikel Terbaru
+            const hero = approvedArticles[0];
+            document.getElementById('hero-featured').classList.remove('hidden');
+            document.getElementById('hero-img').src = hero.image || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop';
+            document.getElementById('hero-category').innerText = hero.category;
+            document.getElementById('hero-title').innerText = hero.title;
+            document.getElementById('hero-snippet').innerText = hero.content;
+            document.getElementById('hero-author').innerText = hero.author;
+            document.getElementById('hero-date').innerText = hero.publishedAt;
+
+            renderGridArticles(approvedArticles);
+            updatePendingBadge();
+        }
+
+        function renderGridArticles(articles) {
+            const gridContainer = document.getElementById('articles-grid');
+            gridContainer.innerHTML = '';
+
+            const filtered = currentCategoryFilter === 'Semua' 
+                ? articles 
+                : articles.filter(a => a.category === currentCategoryFilter);
+
+            if (filtered.length === 0) {
+                gridContainer.innerHTML = '<p class="col-span-full text-center text-slate-500 py-12">Tidak ditemukan artikel untuk kategori ini.</p>';
+                return;
+            }
+
+            filtered.forEach(art => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl overflow-hidden shadow-md border border-slate-200 hover:shadow-lg transition flex flex-col';
+                card.innerHTML = `
+                    <div class="relative h-48 overflow-hidden bg-slate-100">
+                        <img src="${art.image || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=600&auto=format&fit=crop'}" class="w-full h-full object-cover hover:scale-105 transition duration-300" alt="${art.title}">
+                        <span class="absolute top-3 left-3 bg-navy-900/80 backdrop-blur-xs text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase">${art.category}</span>
+                    </div>
+                    <div class="p-5 flex-grow flex flex-col justify-between space-y-3">
+                        <div class="space-y-2">
+                            <h3 onclick="openArticleDetail('${art.id}')" class="font-bold text-lg text-slate-900 line-clamp-2 cursor-pointer hover:text-sman45-blue transition">${art.title}</h3>
+                            <p class="text-slate-600 text-xs line-clamp-3">${art.content}</p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                            <span><i class="fa-regular fa-user mr-1"></i> ${art.author}</span>
+                            <span><i class="fa-regular fa-calendar mr-1"></i> ${art.publishedAt}</span>
+                        </div>
+                    </div>
+                `;
+                gridContainer.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat) {
+            currentCategoryFilter = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.innerText.includes(cat)) {
+                    btn.className = 'cat-btn active px-3 py-1.5 text-xs font-semibold rounded-lg bg-sman45-blue text-white shadow';
+                } else {
+                    btn.className = 'cat-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-100';
+                }
+            });
+            const approvedArticles = currentArticles.filter(a => a.status === 'APPROVED');
+            renderGridArticles(approvedArticles);
+        }
+
+        // Open Detail Modal
+        function openArticleDetail(id) {
+            const article = currentArticles.find(a => a.id === id);
+            if (!article) return;
+
+            document.getElementById('modal-category').innerText = article.category;
+            document.getElementById('modal-title').innerText = article.title;
+            document.getElementById('modal-author').innerText = article.author;
+            document.getElementById('modal-date').innerText = article.publishedAt || article.createdAt;
+            document.getElementById('modal-image').src = article.image || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop';
+            document.getElementById('modal-body').innerText = article.content;
+
+            document.getElementById('modal-detail').classList.remove('hidden');
+        }
+
+        function openDetailFromHero() {
+            const approved = currentArticles.filter(a => a.status === 'APPROVED');
+            if (approved.length > 0) {
+                openArticleDetail(approved[0].id);
+            }
+        }
+
+        // Approval Table (Pemred View)
+        function renderApprovalTable() {
+            const tbody = document.getElementById('approval-table-body');
+            tbody.innerHTML = '';
+
+            if (currentArticles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">Belum ada data artikel.</td></tr>';
+                return;
+            }
+
+            currentArticles.forEach(art => {
+                let statusBadge = '';
+                if (art.status === 'PENDING') {
+                    statusBadge = '<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-amber-100 text-amber-800">Menunggu Review</span>';
+                } else if (art.status === 'APPROVED') {
+                    statusBadge = '<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-green-100 text-green-800">Disetujui / Terbit</span>';
+                } else {
+                    statusBadge = '<span class="px-2.5 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800">Ditolak</span>';
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+                tr.innerHTML = `
+                    <td class="p-4 text-xs font-mono text-slate-500">${art.createdAt}</td>
+                    <td class="p-4">
+                        <div class="font-bold text-slate-800 cursor-pointer hover:text-sman45-blue" onclick="openArticleDetail('${art.id}')">${art.title}</div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase mt-0.5">${art.category}</div>
+                    </td>
+                    <td class="p-4 text-slate-600 font-medium">${art.author}</td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-right space-x-2 whitespace-nowrap">
+                        ${art.status === 'PENDING' ? `
+                            <button onclick="approveArticle('${art.id}', true)" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-bold text-xs shadow transition">
+                                <i class="fa-solid fa-check mr-1"></i> Setujui
+                            </button>
+                            <button onclick="approveArticle('${art.id}', false)" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded font-bold text-xs shadow transition">
+                                <i class="fa-solid fa-xmark mr-1"></i> Tolak
+                            </button>
+                        ` : `
+                            <button onclick="deleteArticle('${art.id}')" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded font-semibold text-xs transition">
+                                <i class="fa-solid fa-trash text-red-500"></i> Hapus
+                            </button>
+                        `}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // My Drafts View (Reporter View)
+        function renderMyDrafts() {
+            const listContainer = document.getElementById('my-drafts-list');
+            listContainer.innerHTML = '';
+
+            const myArticles = currentArticles.filter(a => a.author === currentUser.name || a.authorRole === currentUser.role);
+
+            if (myArticles.length === 0) {
+                listContainer.innerHTML = '<div class="bg-white p-8 rounded-2xl text-center text-slate-500 border">Anda belum membuat tulisan draf artikel.</div>';
+                return;
+            }
+
+            myArticles.forEach(art => {
+                let statusInfo = '';
+                if (art.status === 'PENDING') {
+                    statusInfo = '<div class="text-amber-600 font-bold text-xs"><i class="fa-solid fa-hourglass-half mr-1"></i> Sedang Ditinjau oleh Pemred</div>';
+                } else if (art.status === 'APPROVED') {
+                    statusInfo = '<div class="text-green-600 font-bold text-xs"><i class="fa-solid fa-circle-check mr-1"></i> Diterbitkan Pada: ' + art.publishedAt + '</div>';
+                } else {
+                    statusInfo = '<div class="text-red-600 font-bold text-xs"><i class="fa-solid fa-circle-xmark mr-1"></i> Ditolak Editor</div>';
+                }
+
+                const card = document.createElement('div');
+                card.className = 'bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-4';
+                card.innerHTML = `
+                    <div class="space-y-1 max-w-2xl">
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold text-xs rounded uppercase">${art.category}</span>
+                            <span class="text-xs text-slate-400">${art.createdAt}</span>
+                        </div>
+                        <h4 class="font-bold text-slate-900 text-lg cursor-pointer hover:text-sman45-blue" onclick="openArticleDetail('${art.id}')">${art.title}</h4>
+                        <p class="text-xs text-slate-500 line-clamp-1">${art.content}</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 w-full md:w-auto text-left md:text-right">
+                        ${statusInfo}
+                        ${art.editorNote ? `<div class="text-xs text-slate-500 mt-1 italic">Catatan: "${art.editorNote}"</div>` : ''}
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // Form Submit
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById('form-title').value;
+            const category = document.getElementById('form-category').value;
+            const image = document.getElementById('form-image').value || 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop';
+            const content = document.getElementById('form-content').value;
+
+            const newArticle = {
+                id: 'ART-' + Date.now().toString().slice(-4),
+                title: title,
+                category: category,
+                image: image,
+                content: content,
+                author: currentUser ? currentUser.name : 'Reporter',
+                authorRole: currentUser ? currentUser.role : 'reporter',
+                createdAt: new Date().toISOString().split('T')[0],
+                publishedAt: currentUser && currentUser.role === 'pemred' ? new Date().toISOString().split('T')[0] : '-',
+                status: currentUser && currentUser.role === 'pemred' ? 'APPROVED' : 'PENDING',
+                editorNote: currentUser && currentUser.role === 'pemred' ? 'Auto approved (Pemred)' : ''
+            };
+
+            if (IS_PREVIEW) {
+                dummyArticles.unshift(newArticle);
+                loadArticlesData(dummyArticles);
+                alert('Artikel berhasil dibuat!' + (newArticle.status === 'APPROVED' ? ' Langsung terbit.' : ' Menunggu persetujuan Pemred.'));
+                document.getElementById('article-form').reset();
+                switchView(currentUser.role === 'pemred' ? 'approval' : 'my-drafts');
+            } else {
+                saveArticleToGAS(newArticle);
+            }
+        }
+
+        // Action Approval
+        function approveArticle(id, isApproved) {
+            const art = currentArticles.find(a => a.id === id);
+            if (!art) return;
+
+            const note = prompt(isApproved ? 'Catatan Tambahan untuk Reporter (Opsional):' : 'Alasan Penolakan artikel:');
+            art.status = isApproved ? 'APPROVED' : 'REJECTED';
+            art.publishedAt = isApproved ? new Date().toISOString().split('T')[0] : '-';
+            art.editorNote = note || (isApproved ? 'Disetujui' : 'Ditolak');
+
+            if (IS_PREVIEW) {
+                loadArticlesData(dummyArticles);
+                renderApprovalTable();
+                alert('Status artikel berhasil diperbarui.');
+            } else {
+                updateGASArticleStatus(id, art.status, art.editorNote);
+            }
+        }
+
+        function deleteArticle(id) {
+            if (!confirm('Apakah Anda yakin ingin menghapus artikel ini?')) return;
+
+            if (IS_PREVIEW) {
+                dummyArticles = dummyArticles.filter(a => a.id !== id);
+                loadArticlesData(dummyArticles);
+                renderApprovalTable();
+            } else {
+                deleteGASArticle(id);
+            }
+        }
+
+        // Auth Functions
+        function openLoginModal() {
+            document.getElementById('modal-login').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-username').value.trim();
+            const p = document.getElementById('login-password').value.trim();
+
+            if (IS_PREVIEW) {
+                if (u === 'pemred' && p === 'jurn45hebat') {
+                    currentUser = { username: 'pemred', name: 'Pemimpin Redaksi Jurn45', role: 'pemred' };
+                } else if (u === 'reporter' && p === 'jurn45hebat') {
+                    currentUser = { username: 'reporter', name: 'Budi Santoso (Reporter)', role: 'reporter' };
+                } else {
+                    alert('Username atau Password salah! (Gunakan kredensial dummy di bawah)');
+                    return;
+                }
+                closeModal('modal-login');
+                updateUIState();
+                alert('Selamat datang, ' + currentUser.name);
+            } else {
+                loginToGAS(u, p);
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            updateUIState();
+            switchView('public');
+            alert('Anda telah keluar dari panel redaksi.');
+        }
+
+        function updateUIState() {
+            const loginBtn = document.getElementById('login-btn');
+            const userInfo = document.getElementById('user-info');
+            const dashboardBar = document.getElementById('dashboard-bar');
+            const navApprovalBtn = document.getElementById('nav-approval-btn');
+
+            if (currentUser) {
+                loginBtn.classList.add('hidden');
+                userInfo.classList.remove('hidden');
+                userInfo.classList.add('flex');
+                dashboardBar.classList.remove('hidden');
+
+                document.getElementById('user-display-name').innerText = currentUser.name;
+                document.getElementById('user-role-badge').innerText = currentUser.role;
+
+                if (currentUser.role === 'pemred') {
+                    navApprovalBtn.classList.remove('hidden');
+                } else {
+                    navApprovalBtn.classList.add('hidden');
+                }
+            } else {
+                loginBtn.classList.remove('hidden');
+                userInfo.classList.add('hidden');
+                dashboardBar.classList.add('hidden');
+            }
+            updatePendingBadge();
+        }
+
+        function updatePendingBadge() {
+            const pendingCount = currentArticles.filter(a => a.status === 'PENDING').length;
+            document.getElementById('pending-count').innerText = pendingCount;
+        }
+
+        // ==========================================
+        // INTEGRASI API GOOGLE APPS SCRIPT (GAS REAL)
+        // ==========================================
+        function fetchArticlesFromGAS() {
+            fetch(GAS_URL + '?action=getArticles')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        loadArticlesData(data.articles);
+                    }
+                })
+                .catch(err => console.error('Gagal mengambil data dari GAS:', err));
+        }
+
+        function saveArticleToGAS(article) {
+            fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: 'createArticle', article: article })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Artikel berhasil disimpan ke Google Sheets!');
+                    fetchArticlesFromGAS();
+                    switchView('public');
+                }
+            });
+        }
+
+        function updateGASArticleStatus(id, status, note) {
+            fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: 'updateStatus', id: id, status: status, note: note })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Status berhasil diupdate di database!');
+                    fetchArticlesFromGAS();
+                }
+            });
+        }
+
+        function deleteGASArticle(id) {
+            fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: 'deleteArticle', id: id })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Artikel dihapus dari database!');
+                    fetchArticlesFromGAS();
+                }
+            });
+        }
+
+        function loginToGAS(username, password) {
+            fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: 'login', username: username, password: password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    currentUser = data.user;
+                    closeModal('modal-login');
+                    updateUIState();
+                    alert('Login berhasil! Selamat datang ' + currentUser.name);
+                } else {
+                    alert('Login gagal: ' + data.message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
